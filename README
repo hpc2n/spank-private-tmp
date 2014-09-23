@@ -1,0 +1,11 @@
+
+This is a SPANK plugin for Slurm to create a private /tmp for each job.
+
+If you have issues please let us know or fix it and send us a patch.
+
+Author: 
+	Magnus Jonsson <magnus@hpc2n.umu.se> 
+
+Contributions from:
+	Lars Viklund <lars@hpc2n.umu.se>
+	Ake Sandgren <ake@hpc2n.umu.se>
