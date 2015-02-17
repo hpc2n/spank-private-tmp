@@ -33,7 +33,7 @@ Example
 
 plugstack.conf:
 
-required hpc2n-tmpdir.so base=/tmp/slurm mount=/var/tmp mount=/tmp
+required  private-tmpdir.so  base=/tmp/slurm mount=/var/tmp mount=/tmp
 
 When a job with jobid 100 and restart count 0, the following
 directories will be created on compute nodes:
@@ -65,7 +65,7 @@ Epilog example
 #!/bin/bash
 #
 # Slurm Epilog script that removes directories created by the
-# hpc2n-tmpdir SPANK plugin.
+# private-tmpdir SPANK plugin.
 #
 # TMPDIR_BASE needs to match the configured base= in plugstack.conf
 TMPDIR_BASE=/tmp/slurm

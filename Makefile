@@ -1,9 +1,8 @@
+all: private-tmpdir.so
 
-all: hpc2n-tmpdir.so
-
-hpc2n-tmpdir.so: hpc2n-tmpdir.c
-	gcc -std=gnu99 -Wall -o hpc2n-tmpdir.o -fPIC -c hpc2n-tmpdir.c
-	gcc -shared -o hpc2n-tmpdir.so hpc2n-tmpdir.o 
+private-tmpdir.so: private-tmpdir.c
+	gcc -std=gnu99 -Wall -o private-tmpdir.o -fPIC -c private-tmpdir.c
+	gcc -shared -o private-tmpdir.so private-tmpdir.o
 
 clean:
-	rm -f hpc2n-tmpdir.o hpc2n-tmpdir.so
+	rm -f private-tmpdir.o private-tmpdir.so
