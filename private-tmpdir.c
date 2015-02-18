@@ -10,18 +10,14 @@
 #define _GNU_SOURCE		/* See feature_test_macros(7) */
 
 #include <stdlib.h>
-#include <strings.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <linux/limits.h>
 #include <sys/mount.h>
-#include <linux/fs.h>
 #include <slurm/spank.h>
 #include <unistd.h>
-
 #include <sched.h>
 
 SPANK_PLUGIN(private-tmpdir, 1);
