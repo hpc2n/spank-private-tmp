@@ -27,26 +27,26 @@
 SPANK_PLUGIN(private-tmpdir, 1);
 
 // Default
-const char *tmpdir = "/tmp/slurm";
+static const char *tmpdir = "/tmp/slurm";
 #define MAX_BIND_DIRS 16
 
 // Globals
-int init_opts = 0;
-int binded = 0;
-char pbase[PATH_MAX + 1] = "";
-uid_t uid = (uid_t) - 1;
-gid_t gid = (gid_t) - 1;
-uint32_t jobid;
-uint32_t restartcount;
+static int init_opts = 0;
+static int binded = 0;
+static char pbase[PATH_MAX + 1] = "";
+static uid_t uid = (uid_t) - 1;
+static gid_t gid = (gid_t) - 1;
+static uint32_t jobid;
+static uint32_t restartcount;
 
-char *bind_dirs[MAX_BIND_DIRS];
-char *bind_path[MAX_BIND_DIRS];
-int bind_dirs_count = 0;
+static char *bind_dirs[MAX_BIND_DIRS];
+static char *bind_path[MAX_BIND_DIRS];
+static int bind_dirs_count = 0;
 // Globals
 
-int _tmpdir_bind(spank_t sp, int ac, char **av);
-int _tmpdir_init(spank_t sp, int ac, char **av);
-int _tmpdir_init_opts(spank_t sp, int ac, char **av);
+static int _tmpdir_bind(spank_t sp, int ac, char **av);
+static int _tmpdir_init(spank_t sp, int ac, char **av);
+static int _tmpdir_init_opts(spank_t sp, int ac, char **av);
 
 /*
  *  Called from both srun and slurmd.
@@ -95,7 +95,7 @@ int slurm_spank_local_user_init(spank_t sp, int ac, char **av)
 	return _tmpdir_bind(sp, ac, av);
 }
 
-int _tmpdir_bind(spank_t sp, int ac, char **av)
+static int _tmpdir_bind(spank_t sp, int ac, char **av)
 {
 	int i;
 
@@ -147,7 +147,7 @@ int _tmpdir_bind(spank_t sp, int ac, char **av)
 	return 0;
 }
 
-int _tmpdir_init(spank_t sp, int ac, char **av)
+static int _tmpdir_init(spank_t sp, int ac, char **av)
 {
 	int n;
 
@@ -219,7 +219,7 @@ int _tmpdir_init(spank_t sp, int ac, char **av)
 	return 0;
 }
 
-int _tmpdir_init_opts(spank_t sp, int ac, char **av)
+static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 {
 	int i;
 
