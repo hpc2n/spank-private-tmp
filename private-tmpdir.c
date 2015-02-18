@@ -148,7 +148,7 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 	int n;
 
 	// if length(pbase) > 0, we have already bin here..
-	if (pbase[0] != 0)
+	if (pbase[0] != '\0')
 		return 0;
 
 	if (_tmpdir_init_opts(sp, ac, av))
