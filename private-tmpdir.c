@@ -228,7 +228,7 @@ int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 	init_opts = 1;
 
 	// Init
-	bzero(bind_dirs, sizeof(bind_dirs));
+	memset(bind_dirs, '\0', sizeof(bind_dirs));
 
 	// for each argument in plugstack.conf
 	for (i = 0; i < ac; i++) {
