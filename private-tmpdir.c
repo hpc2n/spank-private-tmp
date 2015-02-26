@@ -208,6 +208,7 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 			slurm_error
 			    ("private-tmpdir: \"%s/%s\" too large. Aborting",
 			     pbase, tmp);
+			free(tmp);
 			return -1;
 		}
 		free(tmp);
