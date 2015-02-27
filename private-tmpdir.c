@@ -174,7 +174,7 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 	    ESPANK_SUCCESS) {
 		slurm_debug
 		    ("private-tmpdir: Unable to get job's restart count");
-		gid = 0;
+		restartcount = 0;
 	}
 	// Init base path
 	n = snprintf(pbase, sizeof(pbase), "%s.%u.%u", tmpdir, jobid,
