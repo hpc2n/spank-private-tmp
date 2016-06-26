@@ -24,7 +24,7 @@
 SPANK_PLUGIN(private-tmpdir, 1);
 
 // Default
-static const char *tmpdir = "/tmp/slurm";
+static const char *base = "/tmp/slurm";
 #define MAX_BIND_DIRS 16
 
 // Globals
@@ -178,11 +178,11 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 		restartcount = 0;
 	}
 	// Init base path
-	n = snprintf(pbase, sizeof(pbase), "%s.%u.%u", tmpdir, jobid,
+	n = snprintf(pbase, sizeof(pbase), "%s.%u.%u", base, jobid,
 		     restartcount);
 	if (n < 0 || n > sizeof(pbase) - 1) {
 		slurm_error("private-tmpdir: \"%s.%u.%u\" too large. Aborting",
-			    tmpdir, jobid, restartcount);
+			    base, jobid, restartcount);
 		return -1;
 	}
 	// Init bind dirs path(s)
@@ -237,8 +237,8 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 				    ("private-tmpdir: no argument given to base= option");
 				return -1;
 			}
-			tmpdir = strdup(optarg);
-			if (!tmpdir) {
+			base = strdup(optarg);
+			if (!base) {
 				slurm_error("private-tmpdir: can't malloc :-(");
 				return -1;
 			}
