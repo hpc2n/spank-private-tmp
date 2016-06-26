@@ -24,7 +24,6 @@
 SPANK_PLUGIN(private-tmpdir, 1);
 
 // Default
-static const char *base = "/tmp/slurm";
 #define MAX_BIND_DIRS 16
 
 // Globals
@@ -36,9 +35,12 @@ static gid_t gid = (gid_t) - 1;
 static uint32_t jobid;
 static uint32_t restartcount;
 
+static char *bases[MAX_BIND_DIRS];
+static char *base_paths[MAX_BIND_DIRS];
 static char *bind_dirs[MAX_BIND_DIRS];
 static char *bind_paths[MAX_BIND_DIRS];
 static int bind_count = 0;
+static int base_count = 0;
 // Globals
 
 static int _tmpdir_bind(spank_t sp, int ac, char **av);
@@ -58,14 +60,17 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 	int i;
 	if (_tmpdir_init(sp, ac, av))
 		return -1;
-	if (mkdir(pbase, 0700)) {
-		slurm_error("private-tmpdir: mkdir(\"%s\",0700): %m", pbase);
-		return -1;
-	}
-	if (chown(pbase, uid, gid)) {
-		slurm_error("private-tmpdir: chown(%s,%u,%u): %m", pbase, uid,
-			    gid);
-		return -1;
+	for (i = 0; i < base_count; i++) {
+		if (mkdir(base_paths[i], 0700)) {
+			slurm_error("private-tmpdir: mkdir(\"%s\",0700): %m",
+				    base_paths[i]);
+			return -1;
+		}
+		if (chown(base_paths[i], uid, gid)) {
+			slurm_error("private-tmpdir: chown(%s,%u,%u): %m",
+				    base_paths[i], uid, gid);
+			return -1;
+		}
 	}
 	for (i = 0; i < bind_count; i++) {
 		if (mkdir(bind_paths[i], 0700)) {
@@ -177,16 +182,21 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 		    ("private-tmpdir: Unable to get job's restart count");
 		restartcount = 0;
 	}
-	// Init base path
-	n = snprintf(pbase, sizeof(pbase), "%s.%u.%u", base, jobid,
-		     restartcount);
-	if (n < 0 || n > sizeof(pbase) - 1) {
-		slurm_error("private-tmpdir: \"%s.%u.%u\" too large. Aborting",
-			    base, jobid, restartcount);
-		return -1;
-	}
-	// Init bind dirs path(s)
-	for (int i = 0; i < bind_count; i++) {
+	// Init base paths
+	for (int i = 0, j = 0; i < bind_count; i++) {
+		if (i == 0 || bases[i] != bases[i - 1]) {
+			n = snprintf(pbase, sizeof(pbase), "%s.%u.%u", bases[i],
+				     jobid, restartcount);
+			if (n < 0 || n > sizeof(pbase) - 1) {
+				slurm_error
+				    ("private-tmpdir: \"%s.%u.%u\" too large. Aborting",
+				     bases[i], jobid, restartcount);
+				return -1;
+			}
+			base_paths[j] = strndup(pbase, sizeof(pbase));
+			j++;
+		}
+		// Init bind dirs path(s)
 		bind_paths[i] =
 		    malloc(strlen(pbase) + strlen(bind_dirs[i]) + 2);
 		if (!bind_paths[i]) {
@@ -220,6 +230,7 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 
 static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 {
+	char *base = "";
 	int i;
 
 	if (init_opts)
@@ -227,7 +238,10 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 	init_opts = 1;
 
 	// Init
+	memset(bases, '\0', sizeof(bases));
+	memset(base_paths, '\0', sizeof(base_paths));
 	memset(bind_dirs, '\0', sizeof(bind_dirs));
+	memset(bind_paths, '\0', sizeof(bind_paths));
 
 	// for each argument in plugstack.conf
 	for (i = 0; i < ac; i++) {
@@ -243,9 +257,20 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 				slurm_error("private-tmpdir: can't malloc :-(");
 				return -1;
 			}
+			base_count++;
 			continue;
 		}
 		if (strncmp("mount=", av[i], 6) == 0) {
+			// mount= before base=, use default value
+			if (base_count == 0) {
+				base = strdup("/tmp/slurm");
+				if (!base) {
+					slurm_error
+					    ("private-tmpdir: can't malloc :-(");
+					return -1;
+				}
+				base_count++;
+			}
 			const char *optarg = av[i] + 6;
 			if (bind_count == MAX_BIND_DIRS) {
 				slurm_error
@@ -264,6 +289,7 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 				    ("private-tmpdir: no argument given to mount= option");
 				return -1;
 			}
+			bases[bind_count] = base;
 			bind_dirs[bind_count] = strdup(optarg);
 			if (!bind_dirs[bind_count]) {
 				slurm_error("private-tmpdir: can't malloc :-(");
