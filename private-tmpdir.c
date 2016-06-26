@@ -3,6 +3,7 @@
  * Author: Magnus Jonsson <magnus@hpc2n.umu.se>
  * Author: Lars Viklund <lars@hpc2n.umu.se>
  * Author: Ake Sandgren <ake@hpc2n.umu.se>
+ * Author: Pär Lindfors <paran@nsc.liu.se>
  */
 
 /* Needs to be defined before first invocation of features.h so enable
