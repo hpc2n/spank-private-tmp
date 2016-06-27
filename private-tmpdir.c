@@ -44,6 +44,7 @@ static int base_count = 0;
 // Globals
 
 static int _tmpdir_bind(spank_t sp, int ac, char **av);
+static int _tmpdir_cleanup(spank_t sp, int ac, char **av);
 static int _tmpdir_init(spank_t sp, int ac, char **av);
 static int _tmpdir_init_opts(spank_t sp, int ac, char **av);
 
@@ -55,9 +56,14 @@ int slurm_spank_init(spank_t sp, int ac, char **av)
 	return _tmpdir_init_opts(sp, ac, av);
 }
 
+int slurm_spank_exit(spank_t sp, int ac, char **av)
+{
+	return _tmpdir_cleanup(sp, ac, av);
+}
+
 int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 {
-	int i;
+	int rc, i;
 	if (_tmpdir_init(sp, ac, av))
 		return -1;
 	for (i = 0; i < base_count; i++) {
@@ -84,7 +90,9 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 			return -1;
 		}
 	}
-	return _tmpdir_bind(sp, ac, av);
+	rc = _tmpdir_bind(sp, ac, av);
+	_tmpdir_cleanup(sp, ac, av);
+	return rc;
 }
 
 int slurm_spank_init_post_opt(spank_t sp, int ac, char **av)
@@ -140,6 +148,23 @@ static int _tmpdir_bind(spank_t sp, int ac, char **av)
 			     bind_dirs[i], jobid);
 			return -1;
 		}
+	}
+	return 0;
+}
+
+static int _tmpdir_cleanup(spank_t sp, int ac, char **av)
+{
+	char *prev_base = NULL;
+	int i;
+
+	for (i = 0; i < MAX_BIND_DIRS; i++) {
+		if (bases[i] != prev_base) {
+			prev_base = bases[i];
+			free(bases[i]);
+		}
+		free(base_paths[i]);
+		free(bind_dirs[i]);
+		free(bind_paths[i]);
 	}
 	return 0;
 }
