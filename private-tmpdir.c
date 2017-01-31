@@ -38,7 +38,7 @@ static uint32_t restartcount;
 
 static char *bind_dirs[MAX_BIND_DIRS];
 static char *bind_paths[MAX_BIND_DIRS];
-static int bind_dirs_count = 0;
+static int bind_count = 0;
 // Globals
 
 static int _tmpdir_bind(spank_t sp, int ac, char **av);
@@ -67,7 +67,7 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 			    gid);
 		return -1;
 	}
-	for (i = 0; i < bind_dirs_count; i++) {
+	for (i = 0; i < bind_count; i++) {
 		if (mkdir(bind_paths[i], 0700)) {
 			slurm_error("private-tmpdir: mkdir(\"%s\",0700): %m",
 				    bind_paths[i]);
@@ -131,7 +131,7 @@ static int _tmpdir_bind(spank_t sp, int ac, char **av)
 		return -1;
 	}
 	// mount --bind bind_paths[i] bind_dirs[i]
-	for (i = 0; i < bind_dirs_count; i++) {
+	for (i = 0; i < bind_count; i++) {
 		slurm_debug("private-tmpdir: mounting: %s %s", bind_paths[i],
 			    bind_dirs[i]);
 		if (mount(bind_paths[i], bind_dirs[i], "none", MS_BIND, NULL)) {
@@ -186,7 +186,7 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 		return -1;
 	}
 	// Init bind dirs path(s)
-	for (int i = 0; i < bind_dirs_count; i++) {
+	for (int i = 0; i < bind_count; i++) {
 		bind_paths[i] =
 		    malloc(strlen(pbase) + strlen(bind_dirs[i]) + 2);
 		if (!bind_paths[i]) {
@@ -247,7 +247,7 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 		}
 		if (strncmp("mount=", av[i], 6) == 0) {
 			const char *optarg = av[i] + 6;
-			if (bind_dirs_count == MAX_BIND_DIRS) {
+			if (bind_count == MAX_BIND_DIRS) {
 				slurm_error
 				    ("private-tmpdir: Reached MAX_BIND_DIRS (%d)",
 				     MAX_BIND_DIRS);
@@ -264,12 +264,12 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 				    ("private-tmpdir: no argument given to mount= option");
 				return -1;
 			}
-			bind_dirs[bind_dirs_count] = strdup(optarg);
-			if (!bind_dirs[bind_dirs_count]) {
+			bind_dirs[bind_count] = strdup(optarg);
+			if (!bind_dirs[bind_count]) {
 				slurm_error("private-tmpdir: can't malloc :-(");
 				return -1;
 			}
-			bind_dirs_count++;
+			bind_count++;
 			continue;
 		}
 		slurm_error("private-tmpdir: Invalid option \"%s\"", av[i]);
