@@ -37,7 +37,7 @@ static uint32_t jobid;
 static uint32_t restartcount;
 
 static char *bind_dirs[MAX_BIND_DIRS];
-static char *bind_path[MAX_BIND_DIRS];
+static char *bind_paths[MAX_BIND_DIRS];
 static int bind_dirs_count = 0;
 // Globals
 
@@ -68,14 +68,14 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 		return -1;
 	}
 	for (i = 0; i < bind_dirs_count; i++) {
-		if (mkdir(bind_path[i], 0700)) {
+		if (mkdir(bind_paths[i], 0700)) {
 			slurm_error("private-tmpdir: mkdir(\"%s\",0700): %m",
-				    bind_path[i]);
+				    bind_paths[i]);
 			return -1;
 		}
-		if (chown(bind_path[i], uid, gid)) {
+		if (chown(bind_paths[i], uid, gid)) {
 			slurm_error("private-tmpdir: chown(%s,%u,%u): %m",
-				    bind_path[i], uid, gid);
+				    bind_paths[i], uid, gid);
 			return -1;
 		}
 	}
@@ -130,11 +130,11 @@ static int _tmpdir_bind(spank_t sp, int ac, char **av)
 		     jobid);
 		return -1;
 	}
-	// mount --bind bind_path[i] bind_dirs[i]
+	// mount --bind bind_paths[i] bind_dirs[i]
 	for (i = 0; i < bind_dirs_count; i++) {
-		slurm_debug("private-tmpdir: mounting: %s %s", bind_path[i],
+		slurm_debug("private-tmpdir: mounting: %s %s", bind_paths[i],
 			    bind_dirs[i]);
-		if (mount(bind_path[i], bind_dirs[i], "none", MS_BIND, NULL)) {
+		if (mount(bind_paths[i], bind_dirs[i], "none", MS_BIND, NULL)) {
 			slurm_error
 			    ("private-tmpdir: failed to mount %s for job: %u, %m",
 			     bind_dirs[i], jobid);
@@ -187,10 +187,11 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 	}
 	// Init bind dirs path(s)
 	for (int i = 0; i < bind_dirs_count; i++) {
-		bind_path[i] = malloc(strlen(pbase) + strlen(bind_dirs[i]) + 2);
-		if (!bind_path[i]) {
+		bind_paths[i] =
+		    malloc(strlen(pbase) + strlen(bind_dirs[i]) + 2);
+		if (!bind_paths[i]) {
 			slurm_error
-			    ("private-tmpdir: Can't malloc bind_path[i]: %m");
+			    ("private-tmpdir: Can't malloc bind_paths[i]: %m");
 			return -1;
 		}
 		char *tmp = strdup(bind_dirs[i]);
@@ -204,7 +205,7 @@ static int _tmpdir_init(spank_t sp, int ac, char **av)
 				tmp[j] = '_';
 			}
 		}
-		n = snprintf(bind_path[i], PATH_MAX, "%s%s", pbase, tmp);
+		n = snprintf(bind_paths[i], PATH_MAX, "%s%s", pbase, tmp);
 		if (n < 0 || n > PATH_MAX - 1) {
 			slurm_error
 			    ("private-tmpdir: \"%s/%s\" too large. Aborting",
