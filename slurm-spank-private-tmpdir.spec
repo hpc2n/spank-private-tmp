@@ -2,7 +2,7 @@
 %define __find_requires %{_builddir}/find-requires
 Summary: Slurm SPANK plugin for job private tmpdir
 Name: slurm-spank-private-tmpdir
-Version: 0.0.1
+Version: 0.0.2
 Release: 1
 License: GPL
 Group: System Environment/Base
@@ -48,5 +48,7 @@ rm -rf %{buildroot}
 %config %{_sysconfdir}/slurm/plugstack.conf.d/private-tmpdir.conf
 
 %changelog
+* Thu Feb 02 2017 Pär Lindfors <paran@nsc.liu.se> - 0.0.2-1
+- Support multiple base parameters
 * Mon Feb 16 2015 Pär Lindfors <paran@nsc.liu.se> - 0.0.1-1
 - Initial RPM packaging
