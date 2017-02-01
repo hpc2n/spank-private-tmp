@@ -1,3 +1,5 @@
+%define _use_internal_dependency_generator 0
+%define __find_requires %{_builddir}/find-requires
 Summary: Slurm SPANK plugin for job private tmpdir
 Name: slurm-spank-private-tmpdir
 Version: 0.0.1
@@ -15,9 +17,19 @@ temporary directories for each job.
 
 %prep
 %setup -q
+# Dummy file used to get a RPM dependency on libslurm.so
+echo 'int main(){}' > %{_builddir}/libslurm_dummy.c
+cat <<EOF > %{_builddir}/find-requires
+#!/bin/sh
+# Add dummy to list of files sent to the regular find-requires
+{ echo %{_builddir}/libslurm_dummy; cat; } | \
+    /usr/lib/rpm/redhat/find-requires
+EOF
+chmod +x %{_builddir}/find-requires
 
 %build
 make all
+gcc -lslurm -o %{_builddir}/libslurm_dummy %{_builddir}/libslurm_dummy.c
 
 %install
 install -d %{buildroot}%{_libdir}/slurm
