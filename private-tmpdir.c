@@ -92,11 +92,6 @@ int slurm_spank_init_post_opt(spank_t sp, int ac, char **av)
 	return _tmpdir_bind(sp, ac, av);
 }
 
-int slurm_spank_local_user_init(spank_t sp, int ac, char **av)
-{
-	return _tmpdir_bind(sp, ac, av);
-}
-
 static int _tmpdir_bind(spank_t sp, int ac, char **av)
 {
 	int i;
