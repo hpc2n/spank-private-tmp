@@ -257,12 +257,6 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 		return 0;
 	init_opts = 1;
 
-	// Init
-	memset(bases, '\0', sizeof(bases));
-	memset(base_paths, '\0', sizeof(base_paths));
-	memset(bind_dirs, '\0', sizeof(bind_dirs));
-	memset(bind_paths, '\0', sizeof(bind_paths));
-
 	// for each argument in plugstack.conf
 	for (i = 0; i < ac; i++) {
 		if (strncmp("base=", av[i], 5) == 0) {
