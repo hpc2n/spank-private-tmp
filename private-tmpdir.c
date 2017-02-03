@@ -298,15 +298,15 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av)
 				     MAX_BIND_DIRS);
 				return -1;
 			}
+			if (!strlen(optarg)) {
+				slurm_error
+				    ("private-tmpdir: no argument given to mount= option");
+				return -1;
+			}
 			if (optarg[0] != '/') {
 				slurm_error
 				    ("private-tmpdir: mount= option must start with a '/': (%s)",
 				     optarg);
-				return -1;
-			}
-			if (!strlen(optarg)) {
-				slurm_error
-				    ("private-tmpdir: no argument given to mount= option");
 				return -1;
 			}
 			bases[bind_count] = base;
