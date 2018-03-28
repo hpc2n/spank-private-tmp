@@ -1,5 +1,9 @@
+This is a SPANK plugin for Slurm that can create private temporary
+directories for each job. This is useful for /tmp, /var/tmp and other
+node-local temporary directories.
 
-This is a SPANK plugin for Slurm to create a private /tmp for each job.
+The implementation uses unshare(CLONE_NEWNS) to unshare the mount
+namespace and then bind mounts the private directories.
 
 If you have issues please let us know or fix it and send us a patch.
 
@@ -9,3 +13,63 @@ Author:
 Contributions from:
 	Lars Viklund <lars@hpc2n.umu.se>
 	Ake Sandgren <ake@hpc2n.umu.se>
+	Pär Lindfors <paran@nsc.liu.se>
+
+Configuration parameters
+------------------------
+
+The SPANK plugin use the following parameters.
+
+base:   For each job the plugin will create a directory named
+        $base.$SLURM_JOB_ID.$SLURM_RESTART_COUNT
+
+mount:  Private mount point. This can be specified more than once.
+
+        For each mount, a directory will be created in the base dir
+        and then bind mounted on the specified mount point.
+
+Example
+-------
+
+plugstack.conf:
+
+required  private-tmpdir.so  base=/tmp/slurm mount=/var/tmp mount=/tmp
+
+When a job with jobid 100 and restart count 0, the following
+directories will be created on compute nodes:
+
+ /tmp/slurm.100.0
+ /tmp/slurm.100.0/var_tmp
+ /tmp/slurm.100.0/tmp
+
+In private namespaces the following bind mounts are done:
+
+  /tmp/slurm.100.0/var_tmp on /var/tmp
+  /tmp/slurm.100.0/tmp     on /tmp
+
+Note: In this example it is important that mount=/tmp is specified
+      last, since after /tmp/slurm.100.0/tmp is bind mounted on /tmp
+      directories in /tmp/slurm.* can no longer be accessed.
+
+Cleanup
+-------
+
+The plugin does not do any cleanup.
+
+See below for an example of how to remove temporary directories from
+Slurms Epilog script.
+
+Epilog example
+--------------
+
+#!/bin/bash
+#
+# Slurm Epilog script that removes directories created by the
+# private-tmpdir SPANK plugin.
+#
+# TMPDIR_BASE needs to match the configured base= in plugstack.conf
+TMPDIR_BASE=/tmp/slurm
+PRIVATE_TMPDIR="${TMPDIR_BASE}.${SLURM_JOB_ID}.${SLURM_RESTART_COUNT:=0}"
+if [ -d "${PRIVATE_TMPDIR}" ]; then
+   rm -rf "${PRIVATE_TMPDIR}"
+fi
