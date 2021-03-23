@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <linux/limits.h>
 #include <sys/mount.h>
 #include <slurm/spank.h>
@@ -53,11 +54,13 @@ static int _tmpdir_init_opts(spank_t sp, int ac, char **av);
  */
 int slurm_spank_init(spank_t sp, int ac, char **av)
 {
+	if (spank_context () != S_CTX_REMOTE) return (0);
 	return _tmpdir_init_opts(sp, ac, av);
 }
 
 int slurm_spank_exit(spank_t sp, int ac, char **av)
 {
+	if (spank_context () != S_CTX_REMOTE) return (0);
 	return _tmpdir_cleanup(sp, ac, av);
 }
 
@@ -67,6 +70,22 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 	if (_tmpdir_init(sp, ac, av))
 		return -1;
 	for (i = 0; i < base_count; i++) {
+		struct stat sbuf;
+		int rc = stat(base_paths[i],&sbuf);
+		if(rc == 0) {
+			if(sbuf.st_uid != uid) {
+				slurm_error("private-tmpdir: stat(\"%s\"): %m exists with wrong owner",
+				    base_paths[i]);
+				return -1;
+			}
+			if(sbuf.st_uid != uid) {
+				slurm_error("private-tmpdir: stat(\"%s\"): %m exists with wrong group",
+				    base_paths[i]);
+				return -1;
+			}
+			// No need to create, already exists
+			continue;
+		}
 		if (mkdir(base_paths[i], 0700)) {
 			slurm_error("private-tmpdir: mkdir(\"%s\",0700): %m",
 				    base_paths[i]);
@@ -79,6 +98,22 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 		}
 	}
 	for (i = 0; i < bind_count; i++) {
+		struct stat sbuf;
+		int rc = stat(bind_paths[i],&sbuf);
+		if(rc == 0) {
+			if(sbuf.st_uid != uid) {
+				slurm_error("private-tmpdir: stat(\"%s\"): %m exists with wrong owner",
+				    bind_paths[i]);
+				return -1;
+			}
+			if(sbuf.st_uid != uid) {
+				slurm_error("private-tmpdir: stat(\"%s\"): %m exists with wrong group",
+				    bind_paths[i]);
+				return -1;
+			}
+			// No need to create, already exists
+			continue;
+		}
 		if (mkdir(bind_paths[i], 0700)) {
 			slurm_error("private-tmpdir: mkdir(\"%s\",0700): %m",
 				    bind_paths[i]);
@@ -97,6 +132,8 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 
 int slurm_spank_init_post_opt(spank_t sp, int ac, char **av)
 {
+	if (spank_context () != S_CTX_REMOTE)
+		return (0);
 	return _tmpdir_bind(sp, ac, av);
 }
 
@@ -157,14 +194,24 @@ static int _tmpdir_cleanup(spank_t sp, int ac, char **av)
 	char *prev_base = NULL;
 	int i;
 
-	for (i = 0; i < MAX_BIND_DIRS; i++) {
+	for (i = 0; i < base_count; i++) {
 		if (bases[i] != prev_base) {
 			prev_base = bases[i];
-			free(bases[i]);
+			if(bases[i]) {
+				free(bases[i]);
+			}
 		}
-		free(base_paths[i]);
-		free(bind_dirs[i]);
-		free(bind_paths[i]);
+		if(base_paths[i]) {
+			free(base_paths[i]);
+		}
+	}
+	for (i = 0; i < bind_count; i++) {
+		if(bind_dirs[i]) {
+			free(bind_dirs[i]);
+		}
+		if(bind_paths[i]) {
+			free(bind_paths[i]);
+		}
 	}
 	return 0;
 }
