@@ -1,5 +1,6 @@
 version=20.02.2
 sysname=`fs sysname| cut -d\' -f2`
+install_path=/afs/hpc2n.umu.se/lap/slurm/${version}/${sysname}/lib/slurm/
 
 all: private-tmpdir.so
 
@@ -11,4 +12,4 @@ clean:
 	rm -f private-tmpdir.o private-tmpdir.so
 
 install: private-tmpdir.so
-	cp private-tmpdir.so /afs/hpc2n.umu.se/lap/slurm/${version}/${sysname}/lib/slurm/
+	cp private-tmpdir.so ${install_path}
