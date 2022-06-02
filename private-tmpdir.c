@@ -78,7 +78,7 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 				    base_paths[i]);
 				return -1;
 			}
-			if(sbuf.st_uid != uid) {
+			if(sbuf.st_gid != gid) {
 				slurm_error("private-tmpdir: stat(\"%s\"): %m exists with wrong group",
 				    base_paths[i]);
 				return -1;
@@ -106,7 +106,7 @@ int slurm_spank_job_prolog(spank_t sp, int ac, char **av)
 				    bind_paths[i]);
 				return -1;
 			}
-			if(sbuf.st_uid != uid) {
+			if(sbuf.st_gid != gid) {
 				slurm_error("private-tmpdir: stat(\"%s\"): %m exists with wrong group",
 				    bind_paths[i]);
 				return -1;
