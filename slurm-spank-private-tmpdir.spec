@@ -15,6 +15,8 @@ Requires: slurm
 Slurm SPANK plugin that uses file system namespaces to create private
 temporary directories for each job.
 
+%global debug_package %{nil}
+
 %prep
 %setup -q
 # Dummy file used to get a RPM dependency on libslurm.so
