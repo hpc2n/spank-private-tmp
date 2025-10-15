@@ -10,15 +10,16 @@ install_path=$(slurm_path)/lib/slurm
 CC=gcc
 CPPFLAGS=-I/lap/slurm/$(version)/include
 CFLAGS=-std=gnu99 -Wall -fPIC
+LIBS=private-tmpdir.so
 
-all: private-tmpdir.so
+all: $(LIBS)
 
 %.so: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $*.o -c $*.c
 	$(CC) -shared -o $@ $*.o
 
 clean:
-	rm -f private-tmpdir.o private-tmpdir.so
+	rm -f $(LIBS:.so=.o) $(LIBS)
 
-install: private-tmpdir.so
+install: $(LIBS)
 	cp $% ${install_path}
