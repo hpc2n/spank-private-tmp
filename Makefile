@@ -7,11 +7,15 @@ sysname=`fs sysname | cut -d\' -f2`
 slurm_path=/afs/hpc2n.umu.se/lap/slurm/${version}/${sysname}
 install_path=$(slurm_path)/lib/slurm
 
+CC=gcc
+CPPFLAGS=-I/lap/slurm/$(version)/include
+CFLAGS=-std=gnu99 -Wall -fPIC
+
 all: private-tmpdir.so
 
 private-tmpdir.so: private-tmpdir.c
-	gcc -I/lap/slurm/${version}/include -std=gnu99 -Wall -o private-tmpdir.o -fPIC -c private-tmpdir.c
-	gcc -shared -o private-tmpdir.so private-tmpdir.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o private-tmpdir.o -c private-tmpdir.c
+	$(CC) -shared -o private-tmpdir.so private-tmpdir.o
 
 clean:
 	rm -f private-tmpdir.o private-tmpdir.so
