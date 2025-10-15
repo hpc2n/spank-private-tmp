@@ -13,7 +13,7 @@ CFLAGS=-std=gnu99 -Wall -fPIC
 
 all: private-tmpdir.so
 
-private-tmpdir.so: private-tmpdir.c
+%.so: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $*.o -c $*.c
 	$(CC) -shared -o $@ $*.o
 
