@@ -14,11 +14,11 @@ CFLAGS=-std=gnu99 -Wall -fPIC
 all: private-tmpdir.so
 
 private-tmpdir.so: private-tmpdir.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o private-tmpdir.o -c private-tmpdir.c
-	$(CC) -shared -o private-tmpdir.so private-tmpdir.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o $*.o -c $*.c
+	$(CC) -shared -o $@ $*.o
 
 clean:
 	rm -f private-tmpdir.o private-tmpdir.so
 
 install: private-tmpdir.so
-	cp private-tmpdir.so ${install_path}
+	cp $% ${install_path}
