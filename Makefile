@@ -22,4 +22,4 @@ clean:
 	rm -f $(LIBS:.so=.o) $(LIBS)
 
 install: $(LIBS)
-	cp $% ${install_path}
+	cp $(LIBS) ${install_path}
